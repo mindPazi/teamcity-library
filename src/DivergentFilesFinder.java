@@ -61,7 +61,11 @@ public class DivergentFilesFinder {
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String sha = reader.readLine().trim(); // str: "a1b2c3d4..."
+            String sha = reader.readLine();
+            if (sha == null) {
+                throw new RuntimeException("Could not find merge base between branches");
+            }
+            sha = sha.trim();
 
             return sha;
         } catch (IOException e) {
