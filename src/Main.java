@@ -1,16 +1,35 @@
 package src;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            properties.load(fis);
+        } catch (IOException e) {
+            System.err.println("Error loading config.properties: " + e.getMessage());
+            return;
+        }
+
+        String username = properties.getProperty("username");
+        String repository = properties.getProperty("repository");
+        String token = properties.getProperty("token");
+        String localPath = properties.getProperty("localPath");
+        String branchA = properties.getProperty("branchA");
+        String branchB = properties.getProperty("branchB");
+
         long startTime = Instant.now().toEpochMilli();
         DivergentFilesFinder finder = new DivergentFilesFinder(
-                "mindPazi",
-                "test-diff",
-                "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",
-                "C:/Users/Andrea/Desktop/test-diff",
-                "branchA",
-                "branchB");
+                username,
+                repository,
+                token,
+                localPath,
+                branchA,
+                branchB);
 
         String baseSha = finder.getMergeBase();
         java.util.Map<String, String> baseFiles = finder.getFilesAtCommit(baseSha);
