@@ -1,6 +1,7 @@
 package src;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -53,7 +54,7 @@ public class DivergentFilesFinder {
             cmd.add("-C");
             cmd.add(this.localRepoPath);
             cmd.add("merge-base");
-            cmd.add("branchA");
+            cmd.add(this.branchA);
             cmd.add(this.branchB);
 
             ProcessBuilder processBuilder = new ProcessBuilder(cmd);
@@ -62,15 +63,10 @@ public class DivergentFilesFinder {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String sha = reader.readLine().trim(); // str: "a1b2c3d4..."
 
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new RuntimeException("Process exited with code " + exitCode);
-            }
-
             return sha;
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Error getting merge base: " + e);
-            return null;
+        } catch (IOException e) {
+            System.err.println("Error getting merge base: " + e.getMessage());
+            throw new RuntimeException("Failed to get merge base", e);
         }
     }
 
@@ -190,15 +186,10 @@ public class DivergentFilesFinder {
                 }
             }
 
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new RuntimeException("Process exited with code " + exitCode);
-            }
-
             return shaMap; // Map: {"file1.txt": "sha1", "file2.txt": "sha2", ...}
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Error getting local file SHAs: " + e);
-            return new HashMap<>();
+        } catch (IOException e) {
+            System.err.println("Error getting local file SHAs: " + e.getMessage());
+            throw new RuntimeException("Failed to get local file SHAs", e);
         }
     }
 
@@ -254,8 +245,8 @@ public class DivergentFilesFinder {
             // Return the dictionary of file SHAs
             return shaMap; // Map: {"file1.txt": "sha1", "file2.txt": "sha2", ...}
         } catch (IOException e) {
-            System.out.println("Error getting remote file SHAs: " + e);
-            return new HashMap<>();
+            System.err.println("Error getting remote file SHAs: " + e.getMessage());
+            throw new RuntimeException("Failed to get remote file SHAs", e);
         }
     }
 
@@ -364,8 +355,36 @@ public class DivergentFilesFinder {
      * Get all files at a specific commit
      */
     public Map<String, String> getFilesAtCommit(String commitSha) {
-        return getLocalFileShas(commitSha); // Map: {"file1.txt": "sha1", "file2.txt": "sha2", ...}
+        // Get all files and their SHA hashes at the specified commit
+        // Returns a map of file paths to their SHA hashes
+        Map<String, String> filesAtCommit = new HashMap<>();
 
+        try {
+            // Execute git command to list all files at the commit
+            ProcessBuilder pb = new ProcessBuilder("git", "ls-tree", "-r", commitSha);
+            pb.directory(new File(this.localRepoPath));
+            Process process = pb.start();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+
+            // Parse the output to extract file paths and their SHA hashes
+            while ((line = reader.readLine()) != null) {
+                // Format: <mode> <type> <object> <file>
+                String[] parts = line.split("\\s+", 4);
+                if (parts.length == 4) {
+                    String sha = parts[2];
+                    String filePath = parts[3];
+                    filesAtCommit.put(filePath, sha);
+                }
+            }
+
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error getting files at commit " + commitSha + ": " + e.getMessage());
+        }
+
+        return filesAtCommit;
     }
 
     /**
