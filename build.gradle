@@ -1,0 +1,90 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'io.github.teamcity'
+version = '1.0.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+dependencies {
+    // Use the local JSON JAR for development
+    implementation files('lib/json-20250107.jar')
+    // For when publishing, use the Maven central version
+    // implementation 'org.json:json:20250107'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+            exclude '**/*.java'
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title': 'TeamCity GitHub Diff Library',
+            'Implementation-Version': project.version
+        )
+    }
+}
+
+task fatJar(type: Jar) {
+    archiveClassifier = 'all'
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'TeamCity GitHub Diff Library'
+                description = 'A library for finding divergent files between branches in GitHub repositories'
+                url = 'https://github.com/yourusername/teamcity-library'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'developer'
+                        name = 'Developer Name'
+                        email = 'developer@example.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+} 

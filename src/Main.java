@@ -3,6 +3,8 @@ package src;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class Main {
@@ -23,22 +25,26 @@ public class Main {
         String branchB = properties.getProperty("branchB");
 
         long startTime = Instant.now().toEpochMilli();
-        DivergentFilesFinder finder = new DivergentFilesFinder(
-                username,
-                repository,
-                token,
+        DivergentFilesFinder finder = new DivergentFilesFinder(token,
                 localPath,
                 branchA,
                 branchB);
 
         String baseSha = finder.getMergeBase();
-        java.util.Map<String, String> baseFiles = finder.getFilesAtCommit(baseSha);
+        Map<String, String> baseFiles = GitFunctions.getFilesAtCommit(localPath, baseSha);
         System.out.println("Base SHA: " + baseSha);
         System.out.println();
         System.out.println("Base files: " + baseFiles);
         System.out.println();
-        java.util.Map<String, String> remoteShas = finder.getRemoteFileShas(finder.getBranchA());
-        java.util.Map<String, String> localShas = finder.getLocalFileShas(finder.getBranchB());
+
+        // Create headers map for GitHub API calls
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "token " + token);
+        headers.put("Accept", "application/vnd.github.v3+json");
+
+        Map<String, String> remoteShas = GitFunctions.getRemoteFileShas(username, repository, finder.getBranchA(),
+                headers);
+        Map<String, String> localShas = GitFunctions.getLocalFileShas(localPath, finder.getBranchB());
         System.out.println("Remote file SHAs: " + remoteShas);
         System.out.println();
         System.out.println("Local file SHAs: " + localShas);

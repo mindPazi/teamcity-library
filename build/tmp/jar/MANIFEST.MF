@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: TeamCity GitHub Diff Library
+Implementation-Version: 1.0.0
+
