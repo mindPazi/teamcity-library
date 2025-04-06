@@ -49,9 +49,9 @@ public class DivergentFilesFinder {
         // Iterate through files that exist in both branches
         for (String file : commonFiles) {
             // Get the SHA of the file in each branch
-            String remoteSha = remoteShas.get(file); // str: "a1b2c3d4..." or null
-            String localSha = localShas.get(file); // str: "e5f6g7h8..." or null
-            String baseSha = baseFiles.get(file); // str: "x1y2z3..." or null
+            String remoteSha = remoteShas.get(file);
+            String localSha = localShas.get(file);
+            String baseSha = baseFiles.get(file);
 
             // If the file exists in both branches, was in base, and has different content
             // in both branches
@@ -74,9 +74,9 @@ public class DivergentFilesFinder {
 
         for (String file : baseFilesSet) {
             // Get the SHA of the file in each branch
-            String remoteSha = remoteShas.get(file); // str: "e5f6g7h8..." or null
-            String localSha = localShas.get(file); // str: "i9j0k1l2..." or null
-            String baseSha = baseFiles.get(file); // str: "a1b2c3d4..." or null
+            String remoteSha = remoteShas.get(file);
+            String localSha = localShas.get(file);
+            String baseSha = baseFiles.get(file);
 
             // If the file exists locally but not remotely
             if (localSha != null && remoteSha == null) {
@@ -129,7 +129,7 @@ public class DivergentFilesFinder {
             String baseSha = entry.getValue();
 
             // Get the SHA of the file in the local branch
-            String localSha = localShas.get(basePath); // str: "a1b2c3d4..." or null
+            String localSha = localShas.get(basePath);
 
             // If the file exists locally and was modified
             if (localSha != null && !localSha.equals(baseSha)) {
@@ -148,7 +148,7 @@ public class DivergentFilesFinder {
             }
 
             // Get the SHA of the file in the remote branch
-            String remoteSha = remoteShas.get(basePath); // str: "e5f6g7h8..." or null
+            String remoteSha = remoteShas.get(basePath);
 
             // If the file exists remotely and was modified
             if (remoteSha != null && !remoteSha.equals(baseSha)) {
@@ -181,8 +181,8 @@ public class DivergentFilesFinder {
             String baseSha = entry.getValue();
 
             // Check if the file exists in each branch
-            boolean remoteHasFile = remoteShas.containsKey(basePath); // boolean: true/false
-            boolean localHasFile = localShas.containsKey(basePath); // boolean: true/false
+            boolean remoteHasFile = remoteShas.containsKey(basePath);
+            boolean localHasFile = localShas.containsKey(basePath);
 
             // If the file doesn't exist locally
             if (!localHasFile) {
