@@ -1,12 +1,16 @@
 plugins {
-    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
     id 'maven-publish'
+    id 'application'
 }
 
 group = 'io.github.teamcity'
 version = '1.0.0'
-sourceCompatibility = '11'
-targetCompatibility = '11'
+
+// Configure the main class for the application
+application {
+    mainClass = 'src.MainKt'
+}
 
 repositories {
     mavenCentral()
@@ -20,23 +24,41 @@ dependencies {
     implementation files('lib/json-20250107.jar')
     // For when publishing, use the Maven central version
     // implementation 'org.json:json:20250107'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+}
+
+// Set JVM target compatibility for both Java and Kotlin
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+    withJavadocJar()
+}
+
+// Make sure Kotlin uses the same JVM target
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+// Configure duplication handling for all JAR tasks
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 sourceSets {
     main {
-        java {
-            srcDirs = ['src']
+        kotlin {
+            srcDir 'src'
         }
         resources {
-            srcDirs = ['src']
+            srcDir 'src'
+            exclude '**/*.kt'
             exclude '**/*.java'
         }
     }
-}
-
-java {
-    withSourcesJar()
-    withJavadocJar()
 }
 
 jar {
@@ -55,7 +77,6 @@ task fatJar(type: Jar) {
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 publishing {
@@ -83,8 +104,4 @@ publishing {
             }
         }
     }
-}
-
-tasks.withType(Jar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 } 

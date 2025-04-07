@@ -1,9 +1,0 @@
--classpath 'C:\\Users\\Andrea\\Desktop\\teamcity-library\\build\\classes\\java\\main;C:\\Users\\Andrea\\Desktop\\teamcity-library\\build\\resources\\main;C:\\Users\\Andrea\\Desktop\\teamcity-library\\lib\\json-20250107.jar'
--d 'C:\\Users\\Andrea\\Desktop\\teamcity-library\\build\\docs\\javadoc'
--doctitle 'teamcity-github-diff 1.0.0 API'
--notimestamp 
--quiet 
--windowtitle 'teamcity-github-diff 1.0.0 API'
-'C:\\Users\\Andrea\\Desktop\\teamcity-library\\src\\DivergentFilesFinder.java'
-'C:\\Users\\Andrea\\Desktop\\teamcity-library\\src\\GitFunctions.java'
-'C:\\Users\\Andrea\\Desktop\\teamcity-library\\src\\Main.java'
